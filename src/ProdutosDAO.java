@@ -91,13 +91,6 @@ public class ProdutosDAO {
                 produto.setValor(valor);
                 produto.setStatus(status);
                 
-                System.out.println(produto.getId());
-                System.out.println(produto.getNome());
-                System.out.println(produto.getValor());
-                System.out.println(produto.getStatus());
-                
-                System.out.println("\n_________________________\n");
-                
                 produtosVendidos.add(produto);
             }
         } catch(SQLException sqle) {
