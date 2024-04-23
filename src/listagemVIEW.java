@@ -9,6 +9,9 @@ public class listagemVIEW extends javax.swing.JFrame {
     public listagemVIEW() {
         initComponents();
         listarProdutos();
+        
+        ProdutosDAO produtosdao = new ProdutosDAO();
+        produtosdao.listarProdutosVendidos();
     }
     
     conectaDAO conexao = new conectaDAO();
