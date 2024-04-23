@@ -2,7 +2,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
+import java.sql.PreparedStatement;
 
 public class ProdutosDAO {
     conectaDAO conexao = new conectaDAO();
@@ -53,5 +53,52 @@ public class ProdutosDAO {
             
         return listagem;
     }    
+    
+    public void venderProduto(Integer id) throws SQLException {
+        conexao.conectar();
+        
+        String sql = "UPDATE produtos SET status = ? WHERE id = ?";
+        PreparedStatement pstmt = conexao.conn.prepareStatement(sql);
+        
+        pstmt.setString(1, "Vendido");
+        pstmt.setInt(2, id);
+        pstmt.executeUpdate();
+        
+        System.out.println("Produto vendido.");
+    }
+    
+    public ArrayList<ProdutosDTO> listarProdutosVendidos(){
+        ArrayList<ProdutosDTO> produtosVendidos = new ArrayList<>();
+        
+         try {
+            conexao.conectar();
+            
+            String sql = "SELECT * FROM produtos WHERE status = ?";
+            PreparedStatement pstmt = conexao.conn.prepareStatement(sql);
+            
+            pstmt.setString(1, "Vendido");
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String nome = rs.getString("nome");
+                int valor = rs.getInt("valor");
+                String status = rs.getString("status");
+                
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(id);
+                produto.setNome(nome);
+                produto.setValor(valor);
+                produto.setStatus(status);
+                
+                produtosVendidos.add(produto);
+            }
+        } catch(SQLException sqle) {
+            System.out.println( "Erro ao efetuar consulta: " + sqle.getMessage());
+            produtosVendidos.clear();
+        }
+         
+        return produtosVendidos;
+    }
 }
 

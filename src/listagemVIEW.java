@@ -1,11 +1,17 @@
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import java.sql.ResultSet;
 
 public class listagemVIEW extends javax.swing.JFrame {
     public listagemVIEW() {
         initComponents();
         listarProdutos();
     }
+    
+    conectaDAO conexao = new conectaDAO();
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -119,15 +125,27 @@ public class listagemVIEW extends javax.swing.JFrame {
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
         String id = id_produto_venda.getText();
         
-        ProdutosDAO produtosdao = new ProdutosDAO();
-        
-        //produtosdao.venderProduto(Integer.parseInt(id));
-        listarProdutos();
+        if (contemApenasNumeros(id)) {
+            if(!produtoJaVendido(id)) {
+                ProdutosDAO produtosdao = new ProdutosDAO();
+
+                try {
+                    produtosdao.venderProduto(Integer.valueOf(id));
+                    JOptionPane.showMessageDialog(rootPane, "Produto vendido com sucesso!");
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(rootPane, "Erro ao inserir dados: " + ex.getMessage());
+                }
+
+                listarProdutos();   
+            }
+        }
+        else JOptionPane.showMessageDialog(rootPane, "Erro! ID deve conter apenas um número inteiro");
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
-        //vendasVIEW vendas = new vendasVIEW(); 
-        //vendas.setVisible(true);
+
+        vendasVIEW vendas = new vendasVIEW(); 
+        vendas.setVisible(true);
     }//GEN-LAST:event_btnVendasActionPerformed
 
     private void btnVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltarActionPerformed
@@ -197,6 +215,32 @@ public class listagemVIEW extends javax.swing.JFrame {
         } catch (Exception e) {
             System.out.println( "Erro ao efetuar consulta: " + e.getMessage());
         }
-    
     }
+    
+    public boolean contemApenasNumeros(String str) {
+        if (str == null || str.isEmpty()) return false;        
+
+        return str.matches("[0-9]+");
+    }
+    
+public boolean produtoJaVendido(String id) {
+    try {
+        conexao.conectar();
+        
+        String sql = "SELECT status FROM produtos WHERE id = ?";
+        PreparedStatement pstmt = conexao.conn.prepareStatement(sql);
+
+        pstmt.setInt(1, Integer.parseInt(id));
+        
+        ResultSet rs = pstmt.executeQuery();
+
+        if (rs.next()) return rs.getString("status").equals("Vendido");
+        else return false; 
+        
+    } catch(SQLException ex) {
+        JOptionPane.showMessageDialog(rootPane, "Erro ao inserir dados: " + ex.getMessage());
+        return false; // Adicionando um retorno padrão
+    }
+}
+
 }
